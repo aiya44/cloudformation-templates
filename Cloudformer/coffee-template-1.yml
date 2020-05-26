@@ -1,0 +1,348 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  zonelocal:
+    Type: 'AWS::Route53::HostedZone'
+    Properties:
+      Name: local.
+      HostedZoneConfig:
+        Comment: >-
+          Created by AWS Cloud Map namespace with ARN
+          arn:aws:servicediscovery:us-west-2:312005675317:namespace/ns-elqufbkv4yp47i5e
+  vpc37051250:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 172.31.0.0/16
+      InstanceTenancy: default
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+        - Key: Name
+          Value: Coffee-VPC
+  subnet05190b5e:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      CidrBlock: 172.31.0.0/20
+      AvailabilityZone: us-west-1b
+      VpcId: !Ref vpc37051250
+      Tags:
+        - Key: Name
+          Value: coffee-subnet-us-west-1b
+  subnetc8e620ae:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      CidrBlock: 172.31.16.0/20
+      AvailabilityZone: us-west-1c
+      VpcId: !Ref vpc37051250
+      Tags:
+        - Key: Name
+          Value: coffee-subnet-us-west-1c
+  igwe7e5f083:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties: {}
+  doptfa06009d:
+    Type: 'AWS::EC2::DHCPOptions'
+    Properties:
+      DomainName: us-west-1.compute.internal
+      DomainNameServers:
+        - AmazonProvidedDNS
+  acl18e3437e:
+    Type: 'AWS::EC2::NetworkAcl'
+    Properties:
+      VpcId: !Ref vpc37051250
+      Tags:
+        - Key: Name
+          Value: Coffee-NACL
+  rtb282fac4e:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref vpc37051250
+      Tags:
+        - Key: Name
+          Value: Coffee-PublicRT
+  distd5em6qya12u3pcloudfrontnet:
+    Type: 'AWS::CloudFront::Distribution'
+    Properties:
+      DistributionConfig:
+        PriceClass: PriceClass_All
+        DefaultCacheBehavior:
+          TargetOriginId: S3-acloudguruwp-media-yc19
+          ViewerProtocolPolicy: allow-all
+          MinTTL: 0
+          AllowedMethods:
+            - HEAD
+            - GET
+          CachedMethods:
+            - HEAD
+            - GET
+          ForwardedValues:
+            Cookies:
+              Forward: none
+        Origins:
+          - DomainName: acloudguruwp-media-yc19.s3.amazonaws.com
+            Id: S3-acloudguruwp-media-yc19
+            S3OriginConfig: {}
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: none
+            Locations: []
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: 'true'
+          MinimumProtocolVersion: TLSv1
+  rdscoffeedatabase1:
+    Type: 'AWS::RDS::DBInstance'
+    Properties:
+      AllocatedStorage: '20'
+      AllowMajorVersionUpgrade: 'false'
+      AutoMinorVersionUpgrade: 'true'
+      DBInstanceClass: db.t2.micro
+      Port: '5432'
+      PubliclyAccessible: 'true'
+      StorageType: gp2
+      BackupRetentionPeriod: '7'
+      MasterUsername: coffee
+      MasterUserPassword: MyPassword
+      PreferredBackupWindow: '07:52-08:22'
+      PreferredMaintenanceWindow: 'tue:11:14-tue:11:44'
+      DBName: MyDatabase
+      Engine: postgres
+      EngineVersion: '11.5'
+      LicenseModel: postgresql-license
+      DBSubnetGroupName: !Ref dbsubnetdefaultvpc37051250
+      VPCSecurityGroups:
+        - !Ref sgdefault
+  s3cftemplatesxfaa08erlnh2uswest1:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      AccessControl: Private
+      VersioningConfiguration:
+        Status: Suspended
+  s3coffeeproject:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      AccessControl: Private
+      VersioningConfiguration:
+        Status: Suspended
+  dbsubnetdefaultvpc37051250:
+    Type: 'AWS::RDS::DBSubnetGroup'
+    Properties:
+      DBSubnetGroupDescription: Created from the RDS Management Console
+      SubnetIds:
+        - !Ref subnetc8e620ae
+        - !Ref subnet05190b5e
+  sgCoffeeCloudformerWebServerSecurityGroupNFOLOGMEKCJO:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable HTTPS access via port 443
+      VpcId: !Ref vpc37051250
+      Tags:
+        - Key: Name
+          Value: Coffee-Cloudformer-Stack1
+  sgWebDMZ:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: WebDMZ
+      VpcId: !Ref vpc37051250
+  sgrdslaunchwizard:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: rds-launch-wizard
+      VpcId: !Ref vpc37051250
+  sglaunchwizard2:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'launch-wizard-2 created 2020-05-14T17:02:48.461-07:00'
+      VpcId: !Ref vpc37051250
+  sglaunchwizard1:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'launch-wizard-1 created 2020-05-14T16:13:52.494-07:00'
+      VpcId: !Ref vpc37051250
+  sglaunchwizard3:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'launch-wizard-3 created 2020-05-16T13:59:28.881-07:00'
+      VpcId: !Ref vpc37051250
+  sgdefault:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: default VPC security group
+      VpcId: !Ref vpc37051250
+  dbsgdefault:
+    Type: 'AWS::RDS::DBSecurityGroup'
+    Properties:
+      GroupDescription: default
+  acl1:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: 'true'
+      Protocol: '-1'
+      RuleAction: allow
+      RuleNumber: '100'
+      NetworkAclId: !Ref acl18e3437e
+  acl2:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Protocol: '-1'
+      RuleAction: allow
+      RuleNumber: '100'
+      NetworkAclId: !Ref acl18e3437e
+  subnetacl1:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref acl18e3437e
+      SubnetId: !Ref subnet05190b5e
+  subnetacl2:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref acl18e3437e
+      SubnetId: !Ref subnetc8e620ae
+  gw1:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref vpc37051250
+      InternetGatewayId: !Ref igwe7e5f083
+  route1:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref rtb282fac4e
+      GatewayId: !Ref igwe7e5f083
+    DependsOn: gw1
+  dchpassoc1:
+    Type: 'AWS::EC2::VPCDHCPOptionsAssociation'
+    Properties:
+      VpcId: !Ref vpc37051250
+      DhcpOptionsId: !Ref doptfa06009d
+  ingress1:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref sgCoffeeCloudformerWebServerSecurityGroupNFOLOGMEKCJO
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+      CidrIp: 0.0.0.0/0
+  ingress2:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref sgWebDMZ
+      IpProtocol: tcp
+      FromPort: '80'
+      ToPort: '80'
+      CidrIp: 0.0.0.0/0
+  ingress3:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref sgWebDMZ
+      IpProtocol: tcp
+      FromPort: '22'
+      ToPort: '22'
+      CidrIp: 0.0.0.0/0
+  ingress4:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref sgrdslaunchwizard
+      IpProtocol: tcp
+      FromPort: '3306'
+      ToPort: '3306'
+      SourceSecurityGroupId: !Ref sgWebDMZ
+      SourceSecurityGroupOwnerId: '312005675317'
+  ingress5:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref sglaunchwizard2
+      IpProtocol: tcp
+      FromPort: '22'
+      ToPort: '22'
+      CidrIp: 0.0.0.0/0
+  ingress6:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref sglaunchwizard1
+      IpProtocol: tcp
+      FromPort: '22'
+      ToPort: '22'
+      CidrIp: 0.0.0.0/0
+  ingress7:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref sglaunchwizard3
+      IpProtocol: tcp
+      FromPort: '80'
+      ToPort: '80'
+      CidrIp: 0.0.0.0/0
+  ingress8:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref sglaunchwizard3
+      IpProtocol: tcp
+      FromPort: '22'
+      ToPort: '22'
+      CidrIp: 0.0.0.0/0
+  ingress9:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref sglaunchwizard3
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+      CidrIp: 0.0.0.0/0
+  ingress10:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref sgdefault
+      IpProtocol: tcp
+      FromPort: '5432'
+      ToPort: '5432'
+      CidrIp: 0.0.0.0/0
+  ingress11:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref sgdefault
+      IpProtocol: '-1'
+      SourceSecurityGroupId: !Ref sgdefault
+      SourceSecurityGroupOwnerId: '312005675317'
+  egress1:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref sgCoffeeCloudformerWebServerSecurityGroupNFOLOGMEKCJO
+      IpProtocol: '-1'
+      CidrIp: 0.0.0.0/0
+  egress2:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref sgWebDMZ
+      IpProtocol: '-1'
+      CidrIp: 0.0.0.0/0
+  egress3:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref sgrdslaunchwizard
+      IpProtocol: '-1'
+      CidrIp: 0.0.0.0/0
+  egress4:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref sglaunchwizard2
+      IpProtocol: '-1'
+      CidrIp: 0.0.0.0/0
+  egress5:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref sglaunchwizard1
+      IpProtocol: '-1'
+      CidrIp: 0.0.0.0/0
+  egress6:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref sglaunchwizard3
+      IpProtocol: '-1'
+      CidrIp: 0.0.0.0/0
+  egress7:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref sgdefault
+      IpProtocol: '-1'
+      CidrIp: 0.0.0.0/0
+Description: Coffee-Cloudformer-Template
